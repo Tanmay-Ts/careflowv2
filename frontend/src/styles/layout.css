@@ -1,0 +1,77 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4f6f8;
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: #0f172a;
+  color: white;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metrics span {
+  margin-left: 16px;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+}
+
+.queue {
+  width: 30%;
+  background: white;
+  border-right: 1px solid #ddd;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.queue-item {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+.queue-item.selected {
+  background: #e0edff;
+  border-color: #3b82f6;
+}
+
+.right-panel {
+  flex: 1;
+  padding: 16px;
+}
+
+.panel {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.panel.empty {
+  color: #666;
+}
+
+.insight {
+  margin-top: 12px;
+  padding: 10px;
+  background: #fff7ed;
+  border-left: 4px solid #f97316;
+}
+
+.actions button {
+  margin-right: 8px;
+}

@@ -1,80 +1,96 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchDelays } from "./api";
+import CasePanel from "./CasePanel";
 
 export default function App() {
   const [delays, setDelays] = useState([]);
-  const [selectedDelay, setSelectedDelay] = useState(null);
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDelays()
-      .then((data) => {
-        setDelays(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .then((data) => setDelays(data))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <h2>Loading CareFlow data…</h2>;
-  if (error) return <h2>Error: {error}</h2>;
+  const selectedDelay = delays.find(d => d.case_id === selectedCaseId) || null;
 
   return (
-    <div style={{ padding: "24px", fontFamily: "Arial" }}>
-      <h1>CareFlow AI</h1>
-      <p>Live hospital operational intelligence</p>
+    <div className="container">
+      {/* HEADER */}
+      <header>
+        <h1>CareFlow AI</h1>
+        <p>Live hospital operational intelligence</p>
+      </header>
 
-      <h2>Active Delays ({delays.length})</h2>
-      {selectedDelay && (
-  <div style={{ marginBottom: "12px", color: "green" }}>
-    Selected case: {selectedDelay.case_id}
-  </div>
-)}
-
-      {delays.map((d, idx) => (
-        <div
-          key={idx}
-          onClick={() => {
-            console.log("Clicked:", d);
-            setSelectedDelay(d);
-          }}
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            padding: "12px",
-            marginBottom: "12px",
-            cursor: "pointer",
-            background:
-                selectedDelay?.case_id === d.case_id ? "#e6f0ff" : "#fafafa"
-          }}
-        >
-          <strong>Case:</strong> {d.case_id} <br />
-          <strong>Department:</strong> {d.department} <br />
-          <strong>Workflow:</strong> {d.rule_name} <br />
-          <strong>Delay:</strong> {d.delay_hours} hrs <br />
-          <strong>Status:</strong> {d.status}
+      {/* METRICS */}
+      <div className="metrics">
+        <div className="card">
+          <strong>{delays.length}</strong>
+          <div>Active Delays</div>
         </div>
-      ))}
 
-      {selectedDelay && (
-        <div
-          style={{
-            marginTop: "24px",
-            padding: "16px",
-            border: "2px solid black",
-          }}
-        >
-          <h3>Selected Case Details</h3>
-          <p><strong>Case:</strong> {selectedDelay.case_id}</p>
-          <p><strong>Department:</strong> {selectedDelay.department}</p>
-          <p><strong>Workflow:</strong> {selectedDelay.rule_name}</p>
-          <p><strong>Delay:</strong> {selectedDelay.delay_hours} hrs</p>
-          <p><strong>Status:</strong> {selectedDelay.status}</p>
+        <div className="card">
+          <strong>
+            {delays.length
+              ? Math.round(
+                  delays.reduce((a, d) => a + d.delay_hours, 0) / delays.length
+                )
+              : 0}
+          </strong>
+          <div>Avg Delay (hrs)</div>
         </div>
-      )}
+
+        <div className="card">
+          <strong>LIVE</strong>
+          <div>Status</div>
+        </div>
+      </div>
+
+      {/* MAIN GRID */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
+        
+        {/* CASE LIST */}
+        <div className="table">
+          <div className="row header">
+            <div>Case</div>
+            <div>Department</div>
+            <div>Workflow</div>
+            <div>Delay</div>
+            <div>Status</div>
+          </div>
+
+          {loading && <div className="row">Loading cases…</div>}
+
+          {!loading && delays.length === 0 && (
+            <div className="row">No active delays</div>
+          )}
+
+          {delays.map((d) => (
+            <div
+              key={d.case_id}
+              className="row"
+              onClick={() => setSelectedCaseId(d.case_id)}
+              style={{
+                cursor: "pointer",
+                background:
+                  selectedCaseId === d.case_id ? "#1f2937" : "transparent",
+              }}
+            >
+              <div>{d.case_id}</div>
+              <div>{d.department}</div>
+              <div>{d.rule_name}</div>
+              <div>{d.delay_hours.toFixed(1)}h</div>
+              <div className={`status ${d.status.toLowerCase()}`}>
+                {d.status}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CASE PANEL (ALWAYS RENDERED) */}
+        <CasePanel delay={selectedDelay} />
+      </div>
     </div>
   );
 }
